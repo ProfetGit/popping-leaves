@@ -81,6 +81,10 @@ public final class SelfTest {
         return captureLeft > 0;
     }
 
+    static void stopCapture() {
+        captureLeft = 0;
+    }
+
     static void startCapture(String name, int frames) {
         captureName = name;
         captureLeft = frames;

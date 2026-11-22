@@ -1,5 +1,6 @@
 package io.github.profetgit.snappyleafdecay.mixin;
 
+import io.github.profetgit.snappyleafdecay.client.Decays;
 import io.github.profetgit.snappyleafdecay.selftest.SelfTest;
 import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;
@@ -11,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MinecraftMixin {
     @Inject(method = "runTick", at = @At("TAIL"))
     private void snappy_leaf_decay$frame(boolean advance, CallbackInfo ci) {
+        Decays.frame();
         if (SelfTest.active()) SelfTest.onFrame((Minecraft) (Object) this);
     }
 

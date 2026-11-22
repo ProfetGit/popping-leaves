@@ -44,6 +44,14 @@ final class TestCompat {
 *///?}
     }
 
+    static void toggleHud(Minecraft mc) {
+        mc.gui.hud.toggle();
+    }
+
+    static boolean hudHidden(Minecraft mc) {
+        return mc.gui.hud.isHidden();
+    }
+
     static String versionName() {
 //? if >=1.21.6 {
         return net.minecraft.SharedConstants.getCurrentVersion().name();
