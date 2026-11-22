@@ -28,9 +28,9 @@ public final class Config {
         /** Ticks from a leaf becoming decaying to its removal, at the cut itself (guess, tune at the feel check). */
         public int delay = 2;
         /** Extra random ticks on top (guess). */
-        public int jitter = 3;
+        public int jitter = 2;
         /** Ticks per block of distance from the cut: the ripple's speed (guess). */
-        public int stagger = 7;
+        public int stagger = 9;
         /** The ripple never adds more than this many ticks, so a giant still falls in a few seconds (guess). */
         public int maxRipple = 60;
         /** Decays per level per tick at most; the rest keep their order and go next tick. */
@@ -54,7 +54,7 @@ public final class Config {
         public double hold = 1;
         public double shrink = 3;
         public double squash = 0.12;
-        public double chipSize = 1.0;
+        public double chipSize = 0.55;
         public double chipSpeed = 1.0;
     }
 

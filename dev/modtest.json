@@ -40,7 +40,9 @@
         }
       ],
       "mp": [
-        "join"
+        "join",
+        "decay",
+        "client_only"
       ]
     },
     "release": {
@@ -54,7 +56,9 @@
         }
       ],
       "mp": [
-        "join"
+        "join",
+        "decay",
+        "client_only"
       ]
     }
   },

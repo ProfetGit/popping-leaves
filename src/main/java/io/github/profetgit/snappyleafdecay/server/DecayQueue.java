@@ -35,6 +35,8 @@ public final class DecayQueue {
     public static volatile int queuedTotal, removedTotal, staleTotal, firstRemovedTick = -1, lastRemovedTick = -1;
     public static volatile long maxTickNanos, sumTickNanos;
     public static volatile int busyTicks, maxRemovedInTick;
+    /** Test hook: the nanos of every busy tick since the last reset (capped), for a percentile. */
+    public static final it.unimi.dsi.fastutil.longs.LongArrayList TICK_NANOS = new it.unimi.dsi.fastutil.longs.LongArrayList();
 
     private DecayQueue() {}
 
@@ -152,6 +154,7 @@ public final class DecayQueue {
             maxRemovedInTick = Math.max(maxRemovedInTick, done);
             long ns = System.nanoTime() - t0;
             sumTickNanos += ns;
+            if (TICK_NANOS.size() < 4096) TICK_NANOS.add(ns);
             if (ns > maxTickNanos) maxTickNanos = ns;
         }
     }
@@ -170,6 +173,7 @@ public final class DecayQueue {
         queuedTotal = removedTotal = staleTotal = busyTicks = maxRemovedInTick = 0;
         firstRemovedTick = lastRemovedTick = -1;
         maxTickNanos = sumTickNanos = 0;
+        TICK_NANOS.clear();
     }
 
     /** SERVER_STOPPED: nothing may outlive its world in this JVM. */

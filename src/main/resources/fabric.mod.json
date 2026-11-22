@@ -18,6 +18,9 @@
     ],
     "client": [
       "io.github.profetgit.snappyleafdecay.client.SnappyLeafDecayClient"
+    ],
+    "modmenu": [
+      "io.github.profetgit.snappyleafdecay.client.ModMenuEntry"
     ]
   },
   "mixins": [

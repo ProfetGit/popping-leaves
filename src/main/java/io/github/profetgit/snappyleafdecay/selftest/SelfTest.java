@@ -67,6 +67,12 @@ public final class SelfTest {
         if (captureLeft <= 0) return;
         Path out = Path.of(OUT, "frames", captureName, String.format("f%03d.png", captureFrame++));
         captureLeft--;
+        try {
+            Files.createDirectories(out.getParent());
+            Files.writeString(out.getParent().resolve("times.csv"), String.format("%s,%.3f%n", out.getFileName(), io.github.profetgit.snappyleafdecay.client.Clock.now()),
+                java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+        } catch (IOException ignored) {
+        }
         TestCompat.screenshot(mc.gameRenderer.mainRenderTarget(), (NativeImage img) -> WRITER.execute(() -> {
             try (img) {
                 Files.createDirectories(out.getParent());

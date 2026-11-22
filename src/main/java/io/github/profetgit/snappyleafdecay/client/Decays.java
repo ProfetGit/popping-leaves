@@ -215,10 +215,12 @@ public final class Decays {
         if (shedUsed >= SHED_PER_TICK || distSq(pos) > FULL_RANGE * FULL_RANGE) return;
         shedUsed++;
         sheds++;
-        Chip chip = new Chip(mc.level, pos.getX() + 0.2 + RANDOM.nextDouble() * 0.6, pos.getY() + 0.1, pos.getZ() + 0.2 + RANDOM.nextDouble() * 0.6, state, pos);
-        chip.fly((RANDOM.nextDouble() - 0.5) * 0.05, -0.02, (RANDOM.nextDouble() - 0.5) * 0.05);
-        chip.scale((float) (c.chipSize * 0.7));
-        mc.particleEngine.add(chip);
+        for (int i = 0; i < 2; i++) {
+            Chip chip = new Chip(mc.level, pos.getX() + 0.2 + RANDOM.nextDouble() * 0.6, pos.getY() + 0.05, pos.getZ() + 0.2 + RANDOM.nextDouble() * 0.6, state, pos);
+            chip.fly((RANDOM.nextDouble() - 0.5) * 0.04, -0.01, (RANDOM.nextDouble() - 0.5) * 0.04);
+            chip.scale((float) (c.chipSize * (0.85 + 0.3 * RANDOM.nextDouble())));
+            mc.particleEngine.add(chip);
+        }
     }
 
     /** End of every frame: a new chip budget. */
@@ -265,8 +267,9 @@ public final class Decays {
         for (int i = 0; i < n; i++) {
             double ox = RANDOM.nextDouble() - 0.5, oy = RANDOM.nextDouble() - 0.5, oz = RANDOM.nextDouble() - 0.5;
             Chip chip = new Chip(mc.level, cx + ox * 0.8, cy + oy * 0.8, cz + oz * 0.8, p.state, p.pos);
-            chip.fly(ox * speed * 2, (oy + 0.6) * speed, oz * speed * 2);
-            chip.scale((float) (c.chipSize * (0.75 + 0.5 * RANDOM.nextFloat())));
+            // outward and a little down: nothing is thrown up, every chip drops a block or two before it shrinks away
+            chip.fly(ox * speed * 0.6, oy * speed * 0.25 - 0.02, oz * speed * 0.6);
+            chip.scale((float) (c.chipSize * (0.85 + 0.3 * RANDOM.nextFloat())));
             mc.particleEngine.add(chip);
         }
         chipsMade += n;

@@ -63,10 +63,10 @@ public final class Chip extends TerrainParticle {
         return super.getQuadSize(a) * Math.clamp(left / FADE_TICKS, 0f, 1f);
     }
 
-    /** Sets the speed (blocks per tick); the chip then falls like any block chip, a little lighter. */
+    /** Sets the speed (blocks per tick); the chip then falls like any block chip. */
     public Chip fly(double xd, double yd, double zd) {
         this.setParticleSpeed(xd, yd, zd);
-        this.gravity = 0.7f;
+        this.gravity = 1.0f;
         this.friction = 0.92f;
         return this;
     }
