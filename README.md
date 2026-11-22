@@ -5,7 +5,7 @@
 <a href="https://ko-fi.com/profetgit"><img src="https://raw.githubusercontent.com/ProfetGit/assets/main/buttons/kofi.webp" alt="Ko-fi" width="23.96%"></a>
 </p>
 
-**Tree down. Leaves pop.** Cut a tree and its leaves follow in one fast wave: each leaf snaps out and sprays a few pixel chips, instead of lingering for a minute and vanishing one by one. A Fabric mod for Minecraft Java 26.3 with a server half and a client half; either one works alone.
+**Tree down. Leaves pop.** Cut a tree and its leaves follow in one fast wave: each leaf snaps out and sprays a few pixel chips, instead of lingering for a minute and vanishing one by one. A mod for Minecraft Java 26.3, 26.2, 1.21.11, 1.21.1 and 1.20.1 on Fabric, Quilt, Forge and NeoForge, with a server half and a client half; either one works alone.
 
 ![Features](https://raw.githubusercontent.com/ProfetGit/popping-leaves/main/docs/desc/title-features.webp)
 
@@ -33,14 +33,14 @@ Open the settings screen from Mod Menu (optional). It has a master switch for th
 
 ![Compatibility](https://raw.githubusercontent.com/ProfetGit/popping-leaves/main/docs/desc/title-compatibility.webp)
 
-- Works with Sodium and Iris shader packs (tested with Complementary), Fair Weather, Timber and Veinminer.
+- Works with Sodium and Iris shader packs (tested with Complementary), Fair Weather, Timber and Veinminer on 26.3. On the older versions only vanilla rendering is tested so far.
 - Cut by a tree feller or by hand, the leaves follow the same way.
 - Other mods that already speed up leaf decay make the server half stand aside, so nothing is doubled.
 - With `randomTickSpeed` 0 the server half stands aside too, as vanilla decay would not run either.
 
 ![Installation](https://raw.githubusercontent.com/ProfetGit/popping-leaves/main/docs/desc/title-installation.webp)
 
-Put the jar in your `mods` folder. Minecraft 26.3 on Fabric (needs Fabric API). Install it on the server for the fast decay, on the client for the pop, or on both.
+Put the jar for your Minecraft version and loader in your `mods` folder. Fabric and Quilt use the Fabric jar and need no other mod (Fabric API is not required); on 1.20.1 NeoForge runs the Forge jar. Install it on the server for the fast decay, on the client for the pop, or on both.
 
 ![More from Profet](https://raw.githubusercontent.com/ProfetGit/popping-leaves/main/docs/desc/title-more-from-profet.webp)
 
