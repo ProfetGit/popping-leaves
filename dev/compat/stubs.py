@@ -13,7 +13,7 @@ for old in OUT.glob("*.jar"):
     old.unlink()
 for mod_id, name in STUBS:
     meta = {"schemaVersion": 1, "id": mod_id, "version": "0.0.0", "name": name, "environment": "*",
-            "description": "Snappy Leaf Decay test stand-in: metadata only, no code."}
+            "description": "Popping Leaves test stand-in: metadata only, no code."}
     jar = OUT / f"{mod_id}-0.0.0.jar"
     with zipfile.ZipFile(jar, "w") as z:
         z.writestr("fabric.mod.json", json.dumps(meta, indent=2))

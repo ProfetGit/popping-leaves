@@ -1,4 +1,4 @@
-# Snappy Leaf Decay — PRD
+# Popping Leaves — PRD
 
 Status: draft (2026-11-22). Mod id `snappy_leaf_decay`, package `io.github.profetgit.snappy_leaf_decay`. Tracker: `STATUS.md`. Draft copy: `docs/draft-v1.md`.
 
@@ -33,7 +33,7 @@ The draft is one line ("fast leaf decay mod, leafs pop in A&S style"), so no con
 | Slot | SnappyDoors parked (still M0, PRD kept) | 2026-11-22 |
 
 My calls, open to veto:
-- Name **Snappy Leaf Decay** (family + the searched words). Shortlist: Leaf Pop, Poof Leaves. Slug check at M0.
+- Name **Popping Leaves** (family + the searched words). Shortlist: Leaf Pop, Poof Leaves. Slug check at M0.
 - Fabric 26.3 only for 1.0.
 - The anticipation is a shed chip (one chip lets go of a leaf that has just become decaying), seen by the client from the synced state: no packet, so it works on a vanilla server too. A real block tremble needs the chunk mesh hidden (Snappy Blocks' hide path with its Sodium hooks): 1.1 at the earliest.
 - The mod stands aside (server half off) when `randomTickSpeed` is 0: admins use that to freeze growth and decay.
@@ -161,7 +161,7 @@ Judge: wave speed and order, snap crispness, chip look, loudness. Tunables: `del
 
 ## 14. Release
 - CurseForge only (Modrinth withheld; do not resubmit). Gate 5 goes through the `release` skill: version and changelog, full tier, release art as 60 fps WebP, description kit (Ko-fi, BisectHosting, promo tiles), AI disclosure, one confirmation of every outward action.
-- Page title carries the searched words ("Snappy Leaf Decay"); description lead is the 5-second shot as a framed 60 fps WebP; the recipe-image rule does not apply (no crafting).
+- Page title carries the searched words ("Popping Leaves"); description lead is the 5-second shot as a framed 60 fps WebP; the recipe-image rule does not apply (no crafting).
 - Nothing is published, pushed or uploaded by this plan.
 
 ## 15. Roadmap

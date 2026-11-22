@@ -65,7 +65,7 @@ public final class DecayQueue {
             for (String id : OTHERS) {
                 if (Platform.isModLoaded(id)) {
                     other = id;
-                    SnappyLeafDecay.LOG.info("Snappy Leaf Decay: {} already speeds up leaf decay, the server half stays off", id);
+                    SnappyLeafDecay.LOG.info("Popping Leaves: {} already speeds up leaf decay, the server half stays off", id);
                     break;
                 }
             }

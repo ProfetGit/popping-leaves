@@ -87,7 +87,7 @@ public final class Config {
             c = GSON.fromJson(raw, Config.class);
             if (c == null) c = new Config();
         } catch (RuntimeException e) {
-            SnappyLeafDecay.LOG.warn("Snappy Leaf Decay: config has a bad value, using defaults ({})", e.toString());
+            SnappyLeafDecay.LOG.warn("Popping Leaves: config has a bad value, using defaults ({})", e.toString());
             c = new Config();
         }
         if (c.server == null) c.server = new Server();
@@ -114,7 +114,7 @@ public final class Config {
                 if (e.isJsonObject()) raw = e.getAsJsonObject();
             }
         } catch (IOException | RuntimeException e) {
-            SnappyLeafDecay.LOG.warn("Snappy Leaf Decay: config unreadable, using defaults ({})", e.toString());
+            SnappyLeafDecay.LOG.warn("Popping Leaves: config unreadable, using defaults ({})", e.toString());
         }
         return raw;
     }
@@ -133,7 +133,7 @@ public final class Config {
             if (!Files.exists(FILE) || !Files.readString(FILE).equals(text)) Files.writeString(FILE, text);
             stamp = Files.getLastModifiedTime(FILE).toMillis();
         } catch (IOException e) {
-            SnappyLeafDecay.LOG.warn("Snappy Leaf Decay: could not write the config ({})", e.toString());
+            SnappyLeafDecay.LOG.warn("Popping Leaves: could not write the config ({})", e.toString());
         }
     }
 

@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 /** Client entry: the clock, the decay detection tick, and a clean slate on every level change. */
 public final class SnappyLeafDecayClient implements ClientModInitializer {
-    public static final Logger LOG = LoggerFactory.getLogger("Snappy Leaf Decay");
+    public static final Logger LOG = LoggerFactory.getLogger("Popping Leaves");
 
     @Override
     public void onInitializeClient() {
@@ -20,7 +20,7 @@ public final class SnappyLeafDecayClient implements ClientModInitializer {
         });
         ClientPlayConnectionEvents.JOIN.register((handler, sender, mc) -> reset());
         ClientPlayConnectionEvents.DISCONNECT.register((handler, mc) -> reset());
-        LOG.info("Snappy Leaf Decay client loaded");
+        LOG.info("Popping Leaves client loaded");
     }
 
     private static void reset() {

@@ -15,7 +15,7 @@ import net.minecraft.network.chat.Component;
  */
 public final class SettingsScreen extends OptionsSubScreen {
     public SettingsScreen(Screen parent) {
-        super(parent, Minecraft.getInstance().options, Component.literal("Snappy Leaf Decay"));
+        super(parent, Minecraft.getInstance().options, Component.literal("Popping Leaves"));
     }
 
     @Override

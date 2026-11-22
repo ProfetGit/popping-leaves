@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 /** Common entry: the config and the server half's tick. */
 public final class SnappyLeafDecay implements ModInitializer {
     public static final String ID = "snappy_leaf_decay";
-    public static final Logger LOG = LoggerFactory.getLogger("Snappy Leaf Decay");
+    public static final Logger LOG = LoggerFactory.getLogger("Popping Leaves");
 
     @Override
     public void onInitialize() {
@@ -18,6 +18,6 @@ public final class SnappyLeafDecay implements ModInitializer {
         ServerTickEvents.END_LEVEL_TICK.register(DecayQueue::tick);
         ServerTickEvents.END_SERVER_TICK.register(server -> Config.pollReload());
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> DecayQueue.clear());
-        LOG.info("Snappy Leaf Decay loaded");
+        LOG.info("Popping Leaves loaded");
     }
 }
