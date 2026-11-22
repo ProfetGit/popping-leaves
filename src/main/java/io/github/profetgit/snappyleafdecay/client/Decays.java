@@ -9,7 +9,9 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Util;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.SoundType;
@@ -36,32 +38,48 @@ public final class Decays {
     private static final class Pop {
         final BlockPos pos;
         final BlockState state;
-        final double t0;
-        final boolean lite;
+        /** When the timeline starts: once a chunk mesh without the leaf is live (see {@link #meshLive}). */
+        double t0 = Double.NaN;
+        boolean live;
+        /** A leaf the level event of a player's break has not claimed within a tick: it is ours. */
+        boolean confirmed;
+        boolean lite;
+        final long bornTick = Clock.ticks();
+        final long bornFrame = frames;
+        boolean drawn;
+        /** Util.getNanos() at the removal: a mesh compiled after this no longer has the leaf. */
+        final long removedNs = Util.getNanos();
+        final long removedWall = System.nanoTime();
         final PopRenderState whole = new PopRenderState();
         boolean chipped;
 
-        Pop(BlockPos pos, BlockState state, double t0, boolean lite) {
+        Pop(BlockPos pos, BlockState state) {
             this.pos = pos;
             this.state = state;
-            this.t0 = t0;
-            this.lite = lite;
         }
     }
 
-    private record Pending(long tick, BlockState state) {}
+    /** The leaf stays drawn for as long as the stale chunk mesh does (PRD 5.2): the copy starts at once, the timeline when the mesh is live. */
+    private static final double MESH_LIMIT_NS = 150_000_000.0;
+    private static final java.util.concurrent.ConcurrentLinkedQueue<long[]> LIVE = new java.util.concurrent.ConcurrentLinkedQueue<>();
+    /** Drawn a hair larger than the block while the chunk mesh still shows the leaf: no z-fighting between the two. */
+    private static final double COVER = 1.004;
+    private static final int MAX_UNCONFIRMED = 1024;
 
     private static final List<Pop> POPS = new ArrayList<>();
-    private static final Long2ObjectOpenHashMap<Pending> PENDING = new Long2ObjectOpenHashMap<>();
+    private static final Long2ObjectOpenHashMap<Pop> PENDING = new Long2ObjectOpenHashMap<>();
     private static final Long2LongOpenHashMap EVENTS = new Long2LongOpenHashMap();
     private static final RandomSource RANDOM = RandomSource.create();
     private static long budgetTick = -1;
+    private static long frames;
+    /** Test hook: the most frames between a leaf leaving the level and its copy first being drawn (must stay 0-1: a gap is a blink). */
+    public static long maxGapFrames;
     private static int budgetUsed, shedUsed, soundsUsed, frameChips;
 
     /** Chips alive (counted by {@link Chip}); reset on level change. */
     public static int liveChips;
     /** Test hooks. */
-    public static int started, lite, overBudget, breaks, sheds, sounds, chipsMade, farSkipped, framesActive, eventsSeen, changesSeen, expiredEvents, otherLoss, maxSoundsInTick;
+    public static int meshWaits, started, lite, overBudget, breaks, sheds, sounds, chipsMade, farSkipped, framesActive, eventsSeen, changesSeen, expiredEvents, otherLoss, maxSoundsInTick;
     public static long firstStartTick = -1, lastStartTick = -1;
     public static String otherState = "";
     public static long spentNanos, chipNanos;
@@ -76,6 +94,7 @@ public final class Decays {
         POPS.clear();
         PENDING.clear();
         EVENTS.clear();
+        LIVE.clear();
         liveChips = 0;
     }
 
@@ -114,7 +133,7 @@ public final class Decays {
                 breaks++;
                 return;
             }
-            PENDING.put(key, new Pending(Clock.ticks(), old));
+            begin(pos, old);
         } else if (decaying(now) && old.getBlock() instanceof LeavesBlock && !decaying(old)) {
             shed(pos, now);
         }
@@ -125,32 +144,32 @@ public final class Decays {
         if (type != 2001 || !on()) return;
         eventsSeen++;
         long key = pos.asLong();
-        if (PENDING.remove(key) != null) {
+        Pop p = PENDING.remove(key);
+        if (p != null) {
+            POPS.remove(p);
             breaks++;
         } else {
             EVENTS.put(key, Clock.ticks() + 1);
         }
     }
 
-    /** Every client tick (END_CLIENT_TICK), after the clock. */
+    /** A chunk mesh went live (any thread): LevelRenderer.removeTransientBlocksInSection. */
+    public static void meshLive(long sectionNode, long compileStartNs) {
+        if (!POPS.isEmpty()) LIVE.add(new long[] {sectionNode, compileStartNs});
+    }
+
+    /** Every client tick (END_CLIENT_TICK), after the clock: a leaf no break event claimed within a tick is a decay. */
     static void tick() {
         long t = Clock.ticks();
         if (!PENDING.isEmpty()) {
-            var it = PENDING.long2ObjectEntrySet().fastIterator();
-            List<long[]> due = null;
-            while (it.hasNext()) {
-                var e = it.next();
-                if (t - e.getValue().tick() >= 1) {
+            List<Pop> due = null;
+            for (Pop p : PENDING.values()) {
+                if (t - p.bornTick >= 1) {
                     if (due == null) due = new ArrayList<>();
-                    due.add(new long[] {e.getLongKey()});
+                    due.add(p);
                 }
             }
-            if (due != null) {
-                for (long[] k : due) {
-                    Pending p = PENDING.remove(k[0]);
-                    start(BlockPos.of(k[0]), p.state());
-                }
-            }
+            if (due != null) for (Pop p : due) confirm(p);
         }
         if (!EVENTS.isEmpty()) EVENTS.values().removeIf(v -> {
             boolean old = t - (v - 1) > 1;
@@ -174,24 +193,39 @@ public final class Decays {
         }
     }
 
-    private static void start(BlockPos pos, BlockState state) {
+    /** The leaf has just gone from the level: draw its copy at once (a gap before it would blink), classify within a tick. */
+    private static void begin(BlockPos pos, BlockState state) {
         Minecraft mc = Minecraft.getInstance();
         ClientLevel level = mc.level;
-        if (level == null || mc.player == null) return;
-        double d2 = distSq(pos);
-        if (d2 > RANGE * RANGE) {
+        if (level == null || mc.player == null || PENDING.size() >= MAX_UNCONFIRMED) return;
+        if (distSq(pos) > RANGE * RANGE) {
             farSkipped++;
             return;
         }
-        newTick();
-        boolean full = ++budgetUsed <= FULL_BUDGET && d2 <= NEAR_RANGE * NEAR_RANGE;
-        if (!full && budgetUsed > FULL_BUDGET + LITE_BUDGET) {
-            overBudget++;
-            return;
-        }
-        Pop p = new Pop(pos.immutable(), state, Clock.now(), !full);
+        Pop p = new Pop(pos.immutable(), state);
         p.whole.init(level, p.pos, state);
         POPS.add(p);
+        PENDING.put(pos.asLong(), p);
+    }
+
+    /** No break event came: a decay. Budgets and the sound are decided here, so a break never spends them. */
+    private static void confirm(Pop p) {
+        PENDING.remove(p.pos.asLong());
+        Minecraft mc = Minecraft.getInstance();
+        ClientLevel level = mc.level;
+        if (level == null) {
+            POPS.remove(p);
+            return;
+        }
+        newTick();
+        boolean full = ++budgetUsed <= FULL_BUDGET && distSq(p.pos) <= NEAR_RANGE * NEAR_RANGE;
+        if (!full && budgetUsed > FULL_BUDGET + LITE_BUDGET) {
+            overBudget++;
+            POPS.remove(p);
+            return;
+        }
+        p.confirmed = true;
+        p.lite = !full;
         started++;
         if (firstStartTick < 0) firstStartTick = Clock.ticks();
         lastStartTick = Clock.ticks();
@@ -200,7 +234,7 @@ public final class Decays {
             soundsUsed++;
             sounds++;
             if (soundsUsed > maxSoundsInTick) maxSoundsInTick = soundsUsed;
-            SoundType st = state.getSoundType();
+            SoundType st = p.state.getSoundType();
             level.playLocalSound(p.pos, st.getBreakSound(), SoundSource.BLOCKS, (st.getVolume() + 1.0f) / 2.0f * 0.5f,
                 st.getPitch() * (0.72f + RANDOM.nextFloat() * 0.16f), false);
         }
@@ -225,6 +259,7 @@ public final class Decays {
 
     /** End of every frame: a new chip budget. */
     public static void frame() {
+        frames++;
         frameChips = 0;
     }
 
@@ -276,17 +311,49 @@ public final class Decays {
         return Math.max(0, n);
     }
 
+    private static void drawScaled(RenderPass pass, Pop p, double sxz, double sy, double s) {
+        if (!p.drawn) {
+            p.drawn = true;
+            maxGapFrames = Math.max(maxGapFrames, frames - p.bornFrame);
+        }
+        PoseStack ps = pass.ps;
+        Vec3 cam = pass.cam;
+        ps.pushPose();
+        ps.translate(p.pos.getX() + 0.5 - cam.x, p.pos.getY() - cam.y, p.pos.getZ() + 0.5 - cam.z);
+        ps.scale((float) sxz, (float) sy, (float) sxz);
+        ps.translate(0, 0.5, 0);
+        ps.scale((float) s, (float) s, (float) s);
+        ps.translate(-0.5, -0.5, -0.5);
+        p.whole.draw(pass);
+        ps.popPose();
+    }
+
     /** In the transient-block pass, every frame. */
     public static void submit(RenderPass pass) {
         long t0 = System.nanoTime();
         try {
             if (POPS.isEmpty()) return;
             framesActive++;
-            PoseStack ps = pass.ps;
-            Vec3 cam = pass.cam;
             double now = Clock.now(), hold = hold(), shrink = Math.max(1, Config.client().shrink), life = hold + shrink;
+            long[] l;
+            while ((l = LIVE.poll()) != null) {
+                for (Pop q : POPS) {
+                    if (!q.live && l[1] > q.removedNs && SectionPos.blockToSection(q.pos.asLong()) == l[0]) q.live = true;
+                }
+            }
+            long wall = System.nanoTime();
             for (int i = POPS.size() - 1; i >= 0; i--) {
                 Pop p = POPS.get(i);
+                if (!p.live && (Clock.stopped() || wall - p.removedWall > MESH_LIMIT_NS)) {
+                    p.live = true;
+                    meshWaits++;
+                }
+                if (Double.isNaN(p.t0) && p.confirmed && p.live) p.t0 = now;
+                if (Double.isNaN(p.t0)) {
+                    // the chunk mesh may still show the leaf, or the break event may still claim it: the copy stands in its place, a hair larger
+                    drawScaled(pass, p, COVER, COVER, COVER);
+                    continue;
+                }
                 double t = now - p.t0;
                 if (t >= life) {
                     if (p.chipped || p.lite) POPS.remove(i);
@@ -305,14 +372,7 @@ public final class Decays {
                     chipNanos += System.nanoTime() - c0;
                 }
                 double[] sc = shape(t);
-                ps.pushPose();
-                ps.translate(p.pos.getX() + 0.5 - cam.x, p.pos.getY() - cam.y, p.pos.getZ() + 0.5 - cam.z);
-                ps.scale((float) sc[0], (float) sc[1], (float) sc[0]);
-                ps.translate(0, 0.5, 0);
-                ps.scale((float) sc[2], (float) sc[2], (float) sc[2]);
-                ps.translate(-0.5, -0.5, -0.5);
-                p.whole.draw(pass);
-                ps.popPose();
+                drawScaled(pass, p, sc[0], sc[1], sc[2]);
             }
         } finally {
             spentNanos += System.nanoTime() - t0;

@@ -13,6 +13,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LevelRenderer.class)
 public abstract class LevelRendererMixin {
+    /** The hand-off signal: a section mesh whose compile started at this time is now live (Sodium calls it too). */
+    @Inject(method = "removeTransientBlocksInSection", at = @At("HEAD"))
+    private void snappy_leaf_decay$meshLive(long sectionNode, long compileTaskStartTimeNs, CallbackInfo ci) {
+        Decays.meshLive(sectionNode, compileTaskStartTimeNs);
+    }
+
     /** The copies are drawn with vanilla's transient blocks, after the terrain. */
     @Inject(method = "submitTransientBlocks", at = @At("TAIL"))
     private void snappy_leaf_decay$submit(PoseStack ps, SubmitNodeCollector collector, LevelRenderState state, CallbackInfo ci) {

@@ -48,6 +48,7 @@ final class Scenarios {
         if (only.equals("all") || only.contains("close")) close(s);
         if (only.equals("all") || only.contains("settings")) settings(s);
         if (only.contains("other")) other(s);
+        if (only.equals("all") || only.contains("solo")) solo(s);
         return s;
     }
 
@@ -323,6 +324,30 @@ final class Scenarios {
         }).server(srv -> cut(srv, cols, 6)).waitTicks(120).run(mc -> {
             SelfTest.stopCapture();
             if (TestCompat.hudHidden(mc)) TestCompat.toggleHud(mc);
+        });
+    }
+
+    /** One leaf, full-size frames of every frame: the blink check (dev/check/blink.py reads them). */
+    private static void solo(Script s) {
+        int[] n = {0, 0};
+        s.server(srv -> {
+            stage(srv, -9, 8, 14);
+            cmd(srv, "fill 0 " + Y + " 0 0 " + (Y + 1) + " 0 minecraft:oak_log");
+            cmd(srv, "setblock 0 " + (Y + 2) + " 0 " + LEAF);
+            cmd(srv, "tp @p 0.5 " + (Y + 1) + " -3 0 0");
+        }).waitTicks(40).run(mc -> {
+            n[0] = Decays.started;
+            n[1] = Decays.meshWaits;
+            Decays.maxGapFrames = 0;
+            if (!TestCompat.hudHidden(mc)) TestCompat.toggleHud(mc);
+            SelfTest.startCapture("solo", 110);
+        }).server(srv -> cmd(srv, "fill 0 " + Y + " 0 0 " + (Y + 1) + " 0 minecraft:air")).waitTicks(90).check("solo_one_pop", mc -> {
+            SelfTest.stopCapture();
+            if (TestCompat.hudHidden(mc)) TestCompat.toggleHud(mc);
+            io.github.profetgit.snappyleafdecay.client.SnappyLeafDecayClient.LOG.info("[selftest] solo: {} pops, {} mesh waits (watchdog), copy drawn at most {} frames after the removal", Decays.started - n[0], Decays.meshWaits - n[1], Decays.maxGapFrames);
+            if (Decays.maxGapFrames > 1) return "the copy came " + Decays.maxGapFrames + " frames after the leaf left the level (a blink)";
+            if (Decays.meshWaits - n[1] > 0) return "mesh hand-off signal never came (" + (Decays.meshWaits - n[1]) + " watchdog starts)";
+            return Decays.started - n[0] == 1 ? null : "pops " + (Decays.started - n[0]) + " of 1";
         });
     }
 
