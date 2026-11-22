@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "snappy_leaf_decay",
+  "version": "${version}",
+  "name": "${name}",
+  "description": "${description}",
+  "authors": [
+    "${author}"
+  ],
+  "contact": {
+    "homepage": "${homepage}"
+  },
+  "license": "LicenseRef-All-Rights-Reserved",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "io.github.profetgit.snappyleafdecay.SnappyLeafDecay"
+    ],
+    "client": [
+      "io.github.profetgit.snappyleafdecay.client.SnappyLeafDecayClient"
+    ]
+  },
+  "mixins": [
+    "snappy_leaf_decay.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${fabric_loader}",
+    "fabric-api": "*",
+    "minecraft": "~${mc}",
+    "java": ">=25"
+  }
+}
