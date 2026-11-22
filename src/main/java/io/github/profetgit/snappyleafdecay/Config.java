@@ -54,8 +54,8 @@ public final class Config {
         public double hold = 1;
         public double shrink = 3;
         public double squash = 0.12;
-        public double chipSize = 2.2;
-        public double chipSpeed = 1.6;
+        public double chipSize = 1.0;
+        public double chipSpeed = 1.0;
     }
 
     private static Config current = new Config();

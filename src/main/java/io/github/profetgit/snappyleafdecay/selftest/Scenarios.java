@@ -35,6 +35,9 @@ final class Scenarios {
         if (only.equals("all") || only.contains("loot")) loot(s);
         if (only.equals("all") || only.contains("stale")) stale(s);
         if (only.equals("all") || only.contains("aside")) aside(s);
+        if (only.equals("all") || only.contains("types")) types(s);
+        if (only.equals("all") || only.contains("calm")) calm(s);
+        if (only.equals("all") || only.contains("close")) close(s);
         return s;
     }
 
@@ -91,7 +94,7 @@ final class Scenarios {
     /** One oak: the wave from the last log to the last leaf (PRD pillar 1: 1.0-2.0 s = 20-40 ticks, guess). */
     private static void oak(Script s) {
         int[] n = {0}, base = new int[4];
-        long[] cutAt = {0};
+        long[] cutAt = {0}, cutClient = {0};
         int[] cols = {0};
         s.server(srv -> {
             stage(srv, -9, 8, 14);
@@ -105,6 +108,8 @@ final class Scenarios {
             base[1] = Decays.breaks;
             base[2] = Decays.overBudget;
             DecayQueue.resetStats();
+            Decays.resetTimes();
+            cutClient[0] = io.github.profetgit.snappyleafdecay.client.Clock.ticks();
             if (!TestCompat.hudHidden(mc)) TestCompat.toggleHud(mc);
             SelfTest.startCapture("oak", 200);
         }).server(srv -> {
@@ -116,9 +121,10 @@ final class Scenarios {
             long first = DecayQueue.firstRemovedTick - cutAt[0], last = DecayQueue.lastRemovedTick - cutAt[0];
             io.github.profetgit.snappyleafdecay.client.SnappyLeafDecayClient.LOG.info(
                 "[selftest] oak wave: {} leaves, first removal {} ticks after the cut, last {} (span {}), removed {}, stale {}, busy ticks {}, max per tick {}; "
-                    + "client: {} pops, {} lite, {} over budget, {} breaks, {} sheds, {} chips, {} sounds",
+                    + "client: {} pops, {} lite, {} over budget, {} breaks, {} sheds, {} chips, {} sounds; client ticks from the cut to the first pop {}, to the last {}, fps {}",
                 n[0], first, last, last - first, DecayQueue.removedTotal, DecayQueue.staleTotal, DecayQueue.busyTicks, DecayQueue.maxRemovedInTick,
-                Decays.started - base[0], Decays.lite, Decays.overBudget - base[2], Decays.breaks - base[1], Decays.sheds, Decays.chipsMade, Decays.sounds);
+                Decays.started - base[0], Decays.lite, Decays.overBudget - base[2], Decays.breaks - base[1], Decays.sheds, Decays.chipsMade, Decays.sounds,
+                Decays.firstStartTick - cutClient[0], Decays.lastStartTick - cutClient[0], mc.getFps());
             if (DecayQueue.removedTotal != n[0]) return "removed " + DecayQueue.removedTotal + " of " + n[0];
             if (last > 40) return "last leaf " + last + " ticks after the cut (> 40)";
             if (last < 20) return "last leaf " + last + " ticks after the cut (< 20, too fast to read)";
@@ -247,6 +253,79 @@ final class Scenarios {
             io.github.profetgit.snappyleafdecay.client.SnappyLeafDecayClient.LOG.info("[selftest] loot: {} leaves, {} saplings (expected {} +- {})", n[0], saplings[0],
                 String.format("%.1f", mean), String.format("%.1f", sd));
             if (saplings[0] < mean - 4 * sd || saplings[0] > mean + 4 * sd) return saplings[0] + " saplings from " + n[0] + " leaves";
+            return null;
+        });
+    }
+
+    private static final String[] TYPES = {"oak", "spruce", "birch", "jungle", "acacia", "dark_oak", "mangrove", "cherry", "pale_oak", "azalea"};
+
+    /** Every leaf type, two rows of five small canopies, cut at once: the stills the critic judges (M2). */
+    private static void types(Script s) {
+        int[] base = new int[3];
+        s.server(srv -> {
+            stage(srv, -9, 14, 14);
+            for (int i = 0; i < TYPES.length; i++) {
+                int x = (i % 5) * 4 - 8, z = (i / 5) * 4;
+                cmd(srv, "fill " + x + " " + Y + " " + z + " " + x + " " + (Y + 4) + " " + z + " minecraft:oak_log");
+                cmd(srv, "fill " + (x - 1) + " " + (Y + 2) + " " + (z - 1) + " " + (x + 1) + " " + (Y + 4) + " " + (z + 1) + " minecraft:" + TYPES[i]
+                    + "_leaves[persistent=false,distance=1] replace minecraft:air");
+            }
+            cmd(srv, "tp @p 0.5 " + (Y + 1) + " -17 0 -4");
+        }).waitTicks(60).run(mc -> {
+            base[0] = Decays.started;
+            base[1] = Decays.chipsMade;
+            DecayQueue.resetStats();
+            if (!TestCompat.hudHidden(mc)) TestCompat.toggleHud(mc);
+            SelfTest.startCapture("types", 170);
+        }).server(srv -> {
+            for (int i = 0; i < TYPES.length; i++) {
+                int x = (i % 5) * 4 - 8, z = (i / 5) * 4;
+                cmd(srv, "fill " + x + " " + Y + " " + z + " " + x + " " + (Y + 4) + " " + z + " minecraft:air");
+            }
+        }).waitTicks(100).check("types_all_pop", mc -> {
+            SelfTest.stopCapture();
+            if (TestCompat.hudHidden(mc)) TestCompat.toggleHud(mc);
+            int pops = Decays.started - base[0], chips = Decays.chipsMade - base[1];
+            io.github.profetgit.snappyleafdecay.client.SnappyLeafDecayClient.LOG.info("[selftest] types: {} pops, {} chips, {} leaves removed", pops, chips, DecayQueue.removedTotal);
+            if (DecayQueue.removedTotal < TYPES.length * 20) return "only " + DecayQueue.removedTotal + " leaves removed";
+            if (pops != DecayQueue.removedTotal) return "pops " + pops + " of " + DecayQueue.removedTotal + " decays";
+            if (chips < pops * 2) return "only " + chips + " chips for " + pops + " pops";
+            return null;
+        });
+    }
+
+    /** One canopy from five blocks away: what a single pop looks like (leaf shrinking out, chips leaving). */
+    private static void close(Script s) {
+        int[] cols = {0};
+        s.server(srv -> {
+            stage(srv, -9, 8, 14);
+            grove(srv, cols, 2, 3, 6);
+            cmd(srv, "tp @p 0.5 " + (Y + 2) + " -7 0 -14");
+        }).waitTicks(60).run(mc -> {
+            if (!TestCompat.hudHidden(mc)) TestCompat.toggleHud(mc);
+            SelfTest.startCapture("close", 150);
+        }).server(srv -> cut(srv, cols, 6)).waitTicks(120).run(mc -> {
+            SelfTest.stopCapture();
+            if (TestCompat.hudHidden(mc)) TestCompat.toggleHud(mc);
+        });
+    }
+
+    /** Calm mode: no hold, one chip per pop, no sheds beyond the same count; sounds never above the per-tick cap. */
+    private static void calm(Script s) {
+        int[] cols = {0};
+        int[] base = new int[3];
+        s.run(mc -> io.github.profetgit.snappyleafdecay.Config.client().calm = true).server(srv -> {
+            stage(srv, -9, 8, 14);
+            grove(srv, cols, 2, 3, 6);
+        }).waitTicks(60).run(mc -> {
+            base[0] = Decays.started;
+            base[1] = Decays.chipsMade;
+        }).server(srv -> cut(srv, cols, 6)).until("calm leaves gone", 400, mc -> leaves(mc, 2, 3, 6) == 0).waitTicks(30).check("calm_one_chip", mc -> {
+            io.github.profetgit.snappyleafdecay.Config.client().calm = false;
+            int pops = Decays.started - base[0], chips = Decays.chipsMade - base[1];
+            if (pops < 80) return "only " + pops + " pops";
+            if (chips > pops) return chips + " chips for " + pops + " pops in calm mode";
+            if (Decays.maxSoundsInTick > Decays.SOUNDS_PER_TICK) return "sounds in one tick " + Decays.maxSoundsInTick;
             return null;
         });
     }

@@ -10,3 +10,4 @@ dist/
 *.iml
 **/.work/
 __pycache__/
+dev/compat/mods/

@@ -71,6 +71,62 @@
         "FreshAnimations_*.zip",
         "FA+Player-*.zip"
       ]
+    },
+    "sodium": {
+      "profile": {
+        "26.3": "Fabric 26.3"
+      },
+      "mods": [
+        "fabric-api-*.jar",
+        "sodium-*.jar"
+      ],
+      "packs": []
+    },
+    "shaders": {
+      "profile": {
+        "26.3": "Fabric 26.3"
+      },
+      "mods": [
+        "fabric-api-*.jar",
+        "sodium-*.jar",
+        "iris-*.jar",
+        "entityculling-*.jar",
+        "punchy-*.jar",
+        "ferritecore-*.jar"
+      ],
+      "packs": [],
+      "shaders": true
+    },
+    "fair": {
+      "profile": {
+        "26.3": "Fabric 26.3"
+      },
+      "mods": [
+        "fabric-api-*.jar",
+        "sodium-*.jar",
+        "fair_weather-*.jar"
+      ],
+      "packs": []
+    },
+    "timber": {
+      "profile": {
+        "26.3": "Fabric 26.3"
+      },
+      "mods": [
+        "fabric-api-*.jar",
+        "vanilla_timber-*.jar"
+      ],
+      "packs": []
+    },
+    "aside": {
+      "profile": {
+        "26.3": "/home/emppu/Projects/Minecraft Datapacks/mods/SnappyLeafDecay/dev/compat"
+      },
+      "mods": [
+        "leavesbegone-*.jar",
+        "fastleafdecay-*.jar"
+      ],
+      "packs": []
     }
   },
   "mp": {
@@ -96,6 +152,78 @@
           },
           {
             "wait": "Guest joined the game",
+            "timeout": 240
+          }
+        ]
+      },
+      "decay": {
+        "clients": [
+          {
+            "user": "Host",
+            "role": "host",
+            "seconds": 75
+          },
+          {
+            "user": "Guest",
+            "role": "guest",
+            "modded": false,
+            "seconds": 75,
+            "after": "Host joined the game"
+          }
+        ],
+        "steps": [
+          {
+            "wait": "Guest joined the game",
+            "timeout": 240,
+            "send": [
+              "fill 0 -59 0 0 -53 0 minecraft:oak_log",
+              "fill -2 -56 -2 2 -53 2 minecraft:oak_leaves[persistent=false,distance=1] replace minecraft:air"
+            ]
+          },
+          {
+            "sleep": 4,
+            "name": "tree_stands",
+            "test": "execute if block 2 -53 2 minecraft:oak_leaves"
+          },
+          {
+            "sleep": 1,
+            "send": [
+              "fill 0 -59 0 0 -52 0 minecraft:air"
+            ]
+          },
+          {
+            "sleep": 8,
+            "name": "corner_gone",
+            "test": "execute unless block 2 -53 2 minecraft:oak_leaves"
+          },
+          {
+            "name": "low_gone",
+            "test": "execute unless block -2 -56 -2 minecraft:oak_leaves"
+          },
+          {
+            "name": "mid_gone",
+            "test": "execute unless block 0 -54 2 minecraft:oak_leaves"
+          }
+        ],
+        "checks": [
+          {
+            "name": "no_exception",
+            "absent": "Exception"
+          }
+        ]
+      },
+      "client_only": {
+        "server": "vanilla",
+        "clients": [
+          {
+            "user": "Solo",
+            "role": "solo",
+            "seconds": 40
+          }
+        ],
+        "steps": [
+          {
+            "wait": "Solo joined the game",
             "timeout": 240
           }
         ]

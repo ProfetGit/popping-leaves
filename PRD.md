@@ -17,6 +17,14 @@ The draft is one line ("fast leaf decay mod, leafs pop in A&S style"), so no con
 - "Pop" must not mean "break": a leaf removed by decay is not a player break (no crack, no tool). Fix: the client tells them apart by state, never by guessing (§ 5.2).
 - Kept on purpose: vanilla loot, vanilla persistent-leaf rule, no instant removal (an instant tree loses the moment).
 
+## 2b. Changes during the build (2026-11-22, M1-M2; the sections below are corrected where they conflict)
+- **Ripple origin:** the server cannot see the felled log, so `LeavesBlock.updateShape` notes where a distance-1 leaf lost a non-log, non-leaf neighbour (the cut) and a decaying leaf goes `delay + min(maxRipple, round(distance_to_nearest_cut * stagger)) + jitter` ticks after it became decaying. Defaults delay 2, jitter 3, stagger 7 ticks per block, maxRipple 60, maxPerTick 40. Vanilla's own distance cascade is lockstep (every leaf reaches 7 within a few ticks), so it gave no ripple; this does. A leaf with no cut nearby gets a short random spread. Measured: oak (96 leaves) first removal 6 ticks and last 26 ticks after the cut; 1,920 leaves 61 ticks.
+- **Anticipation:** shed chip instead of a block tremble (see 3); no S2C packet.
+- **Chips:** one opaque texel of the leaf texture each (never a transparent hole, never a multi-texel window), edge about 1-2 texels of world size, the biome tint without TerrainParticle's 60% darkening, gravity 0.7, 10-16 ticks, shrinking over the last 3. The critic rejected the first version (4-6 texel patches that hung in the air for 1.5 s and read as litter).
+- **Stand-aside setting:** `server.respectRandomTickSpeed` (default true) in the config, so tests can run with `random_tick_speed 0`.
+- **Compat stand-aside ids** in `DecayQueue.OTHERS` come from store listings and are unverified.
+- Fixed numbers: worst server tick and mean (pillar 2), chips alive cap 600 and per-tick budgets 16 full + 64 lite (`Decays`).
+
 ## 3. Decisions
 | Topic | Choice | Date |
 |---|---|---|
@@ -27,7 +35,7 @@ The draft is one line ("fast leaf decay mod, leafs pop in A&S style"), so no con
 My calls, open to veto:
 - Name **Snappy Leaf Decay** (family + the searched words). Shortlist: Leaf Pop, Poof Leaves. Slug check at M0.
 - Fabric 26.3 only for 1.0.
-- Tremble comes from a small S2C warning packet, so it exists only with the mod on both sides; a vanilla server gets the pop without the tremble.
+- The anticipation is a shed chip (one chip lets go of a leaf that has just become decaying), seen by the client from the synced state: no packet, so it works on a vanilla server too. A real block tremble needs the chunk mesh hidden (Snappy Blocks' hide path with its Sodium hooks): 1.1 at the earliest.
 - The mod stands aside (server half off) when `randomTickSpeed` is 0: admins use that to freeze growth and decay.
 - Decays that were already pending when a chunk loaded stay vanilla (random ticks); the fast queue takes only leaves that become decaying while loaded.
 - Whole tree total time target 1.0-2.0 s for an oak, at most 3 s for a jungle giant (guess, tune at feel check).
@@ -35,7 +43,7 @@ My calls, open to veto:
 
 ## 4. Pillars
 1. **Readable wave.** A normal oak (about 80 leaves) is fully gone 1.0-2.0 s after its last log leaves; a jungle giant within 3 s. Measured by scenes `oak` and `giant` (named asserts on first and last decay tick).
-2. **Cheap on the server.** A 2,000-leaf tree costs at most 2 ms in its worst tick and under 0.3 ms mean over the wave, on top of vanilla. Measured by scene `perf` (per-tick timer around the queue).
+2. **Cheap on the server.** A 1,900-leaf tree costs at most 2 ms in its worst tick and at most 1.5 ms mean over the busy ticks (`maxPerTick` 40). That is the cost of the removals themselves (about 20 us per leaf, drops and neighbour updates), the same total vanilla pays over a minute; the queue's own work is a heap pop. Measured by scene `perf` (timer around the queue): worst 1.6-2.0 ms, mean 0.84-0.97 ms.
 3. **Cheap on the client.** At most 1 ms per frame with 500 leaves popping at once, at most 600 live chips. Measured by scene `crowd` (frame time with and without the mod, same seed).
 4. **Nothing lost, nothing new.** Loot per leaf equals vanilla's loot table; player-placed (persistent) leaves never decay; a decay never touches a block that stopped being a decaying leaf. Measured by scene `loot` (1,000 leaves, drop counts within a binomial band of vanilla's) and `stale`.
 5. **Native and still.** Solid-texel chips only, 60 fps, no flicker, nothing teleports. Measured by `wb img flicker` on scenes `oak` and `giant`, and the director's verdict on stills.
@@ -79,9 +87,8 @@ My calls, open to veto:
 
 ## 7. Multiplayer and security
 - The server half is server-authoritative; it changes nothing a vanilla server wouldn't do, only sooner, and it does not read client input.
-- The warning packet is S2C, sent only to clients that report the mod on join (Fabric `canSend` check) and are within 64 blocks; vanilla clients get nothing extra and still see the leaves vanish early.
+- No packets at all (build change 2026-11-22): the client reads the synced leaf state, so a vanilla client sees the fast decay and a modded client on a vanilla server still gets the pop.
 - No claim or permission interplay: leaf decay is a world rule, not a player action; protected regions that cancel block changes see decay as vanilla random ticks would be (it uses the same removal call).
-- Batching: one packet per level tick per player carries all new warnings (positions plus due ticks), capped at 256 entries; excess leaves pop without tremble.
 - Dedicated server with two clients (one with the mod, one vanilla) is an exit check at M3 (`dev/server/mp.py`).
 
 ## 8. Data and persistence
@@ -105,7 +112,7 @@ My calls, open to veto:
 ## 10. Performance
 - Server: queue add O(1) on the leaf's own tick, one hash lookup at due time; worst tick for a 2,000-leaf tree at most 2 ms, mean under 0.3 ms (scene `perf`). `max_per_tick` bounds the worst case at any tree size.
 - Client: at most 1 ms per frame with 500 simultaneous pops, 600 chips (scene `crowd`, compared with the mod disabled on the same seed). Chips pooled, copies reuse Snappy Blocks' draw path; no allocation per frame in the steady state (check allocation rate in `crowd`).
-- Network: one batched packet per tick per player during a wave, under 3 KB (256 entries × about 10 bytes).
+- Network: no extra packets.
 - Worst case: `/fill` of 50,000 non-persistent leaves with no logs: the decay spreads over `ceil(50000 / 64)` ticks (about 40 s) with the tick time bounded; measured once in `perf`.
 
 ## 11. Technical design
@@ -204,4 +211,4 @@ Checked 2026-11-22 (web search; download counts and loaders not yet read, M0 tas
 1. Does Snappy Blocks already pop leaves removed by decay? Default: this mod owns decay, Snappy Blocks owns player breaks; settle by the M1 two-jar count.
 2. Should pasted or decorative non-persistent leaves be protected? Default: no, same as vanilla but faster; revisit if the feel check or a user note says so.
 3. Wave order: from the cut outward, top-down, or random? Default `cut`; the director decides at the feel check.
-4. Tremble packet: keep it, or drop it and let the pop stand alone? Default keep; drop if the vanilla-server pop alone already feels right.
+4. Answered by the build: no tremble packet; the shed chip is the anticipation (see 2b). Real block tremble: 1.1.

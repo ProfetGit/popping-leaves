@@ -30,7 +30,7 @@ public final class Decays {
     static final int MAX_CHIPS = 600;
     /** Chips made per frame at most (they cost about 55 us each with many mods): a big collapse spreads them over frames. */
     static final int CHIPS_PER_FRAME = 24;
-    static final int SOUNDS_PER_TICK = 6;
+    public static final int SOUNDS_PER_TICK = 6;
     static final int SHED_PER_TICK = 8;
 
     private static final class Pop {
@@ -61,11 +61,16 @@ public final class Decays {
     /** Chips alive (counted by {@link Chip}); reset on level change. */
     public static int liveChips;
     /** Test hooks. */
-    public static int started, lite, overBudget, breaks, sheds, sounds, chipsMade, farSkipped, framesActive, eventsSeen, changesSeen, expiredEvents, otherLoss;
+    public static int started, lite, overBudget, breaks, sheds, sounds, chipsMade, farSkipped, framesActive, eventsSeen, changesSeen, expiredEvents, otherLoss, maxSoundsInTick;
+    public static long firstStartTick = -1, lastStartTick = -1;
     public static String otherState = "";
     public static long spentNanos, chipNanos;
 
     private Decays() {}
+
+    public static void resetTimes() {
+        firstStartTick = lastStartTick = -1;
+    }
 
     static void clear() {
         POPS.clear();
@@ -188,10 +193,13 @@ public final class Decays {
         p.whole.init(level, p.pos, state);
         POPS.add(p);
         started++;
+        if (firstStartTick < 0) firstStartTick = Clock.ticks();
+        lastStartTick = Clock.ticks();
         if (p.lite) lite++;
         if (Config.client().sound && full && soundsUsed < SOUNDS_PER_TICK) {
             soundsUsed++;
             sounds++;
+            if (soundsUsed > maxSoundsInTick) maxSoundsInTick = soundsUsed;
             SoundType st = state.getSoundType();
             level.playLocalSound(p.pos, st.getBreakSound(), SoundSource.BLOCKS, (st.getVolume() + 1.0f) / 2.0f * 0.5f,
                 st.getPitch() * (0.72f + RANDOM.nextFloat() * 0.16f), false);
