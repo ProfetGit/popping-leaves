@@ -12,13 +12,13 @@ public final class Clock {
 
     private Clock() {}
 
-    static void tick(Minecraft mc) {
+    public static void tick(Minecraft mc) {
         if (mc.level == null || mc.isPaused()) return;
         frozen = !mc.level.tickRateManager().runsNormally();
         if (!frozen) ticks++;
     }
 
-    static void reset() {
+    public static void reset() {
         ticks = 0;
         frozen = false;
     }

@@ -19,7 +19,6 @@ repositories {
 dependencies {
     minecraft("com.mojang:minecraft:$mc")
     implementation("net.fabricmc:fabric-loader:${property("deps.fabric_loader")}")
-    implementation("net.fabricmc.fabric-api:fabric-api:${property("deps.fabric_api")}")
 
     // optional: Mod Menu's settings button; compile only, not shipped or required
     compileOnly("com.terraformersmc:modmenu:${property("deps.modmenu")}") { isTransitive = false }
@@ -64,6 +63,8 @@ tasks.processResources {
         "author" to project.property("mod.author"),
         "homepage" to project.property("mod.homepage"),
         "fabric_loader" to project.property("deps.fabric_loader"),
+        "mc_range" to ((findProperty("deps.mc_range") as String?) ?: "~$mc"),
+        "java" to "25",
     )
     inputs.properties(props)
     filesMatching("fabric.mod.json") { expand(props) }

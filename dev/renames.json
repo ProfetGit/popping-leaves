@@ -1,0 +1,281 @@
+[
+  {
+    "from": "getDeltaTracker",
+    "to": "getTimer",
+    "when": "<1.21.2"
+  },
+  {
+    "regex": "net\\.minecraft\\.util\\.Util\\b",
+    "to": "net.minecraft.Util",
+    "when": "<1.21.2"
+  },
+  {
+    "from": "EntityTypes",
+    "to": "EntityType",
+    "when": "<26.2"
+  },
+  {
+    "from": "PARTICLES_AND_SOUND_DESTROY_BLOCK",
+    "to": "PARTICLES_DESTROY_BLOCK",
+    "when": "<26.2"
+  },
+  {
+    "regex": "LevelEvent\\.PARTICLES_DESTROY_PROGRESS",
+    "to": "2019",
+    "when": "<26.2"
+  },
+  {
+    "regex": "LevelEvent\\.PARTICLES_AND_SOUND_DESTROY_PROGRESS",
+    "to": "2020",
+    "when": "<26.2"
+  },
+  {
+    "from": "getSelectedItem",
+    "to": "getSelected",
+    "when": "<1.21.2"
+  },
+  {
+    "from": "levelExtractor",
+    "to": "levelRenderer",
+    "when": "<26.2"
+  },
+  {
+    "regex": "\\.getMainCamera\\(\\)\\.position\\(\\)",
+    "to": ".getMainCamera().getPosition()",
+    "when": "<1.21.2"
+  },
+  {
+    "regex": "\\.gui\\.isHidden\\(\\)",
+    "to": ".options.hideGui",
+    "when": "<26.2"
+  },
+  {
+    "from": "RenderSectionRegion",
+    "to": "RenderChunkRegion",
+    "when": "<1.21.2"
+  },
+  {
+    "from": "Hud",
+    "to": "Gui",
+    "when": "<26.2",
+    "files": "^HudMixin\\.java$"
+  },
+  {
+    "from": "extractSlot",
+    "to": "renderSlot",
+    "when": "<26.2"
+  },
+  {
+    "regex": "Lnet/minecraft/network/PacketProcessor;",
+    "to": "Lnet/minecraft/util/thread/BlockableEventLoop;",
+    "when": "<1.21.2"
+  },
+  {
+    "regex": "\\.entityIds\\(\\)",
+    "to": ".getEntityIds()",
+    "when": "<26.2"
+  },
+  {
+    "regex": "net\\.minecraft\\.client\\.renderer\\.block\\.BlockAndTintGetter",
+    "to": "net.minecraft.world.level.BlockAndTintGetter",
+    "when": "<26.2"
+  },
+  {
+    "regex": "net/minecraft/client/renderer/block/BlockAndTintGetter",
+    "to": "net/minecraft/world/level/BlockAndTintGetter",
+    "when": "<26.2"
+  },
+  {
+    "regex": "import net\\.minecraft\\.client\\.DeltaTracker;\\n",
+    "to": "",
+    "when": "<1.21"
+  },
+  {
+    "regex": "DeltaTracker delta",
+    "to": "float delta",
+    "when": "<1.21"
+  },
+  {
+    "regex": "mc\\.level\\.tickRateManager\\(\\)\\.runsNormally\\(\\)",
+    "to": "true",
+    "when": "<1.21"
+  },
+  {
+    "regex": "\\.getTimer\\(\\)\\.getGameTimeDeltaPartialTick\\(false\\)",
+    "to": ".getFrameTime()",
+    "when": "<1.21"
+  },
+  {
+    "regex": "\\bMath\\.clamp\\(",
+    "to": "net.minecraft.util.Mth.clamp(",
+    "when": "<1.21"
+  },
+  {
+    "regex": "mc\\.isGameLoadFinished\\(\\)",
+    "to": "(mc.getOverlay() == null)",
+    "when": "<1.21"
+  },
+  {
+    "regex": "(\\w+(?:\\.\\w+)*)\\.shouldSpawnTerrainParticles\\(\\)",
+    "to": "($1.getRenderShape() != net.minecraft.world.level.block.RenderShape.INVISIBLE)",
+    "when": "<1.21",
+    "groups": "1"
+  },
+  {
+    "from": "isSameItemSameComponents",
+    "to": "isSameItemSameTags",
+    "when": "<1.21"
+  },
+  {
+    "regex": "(createWorldDimensions\\(\\)), mc\\.screen\\)",
+    "to": "$1)",
+    "when": "<1.21",
+    "groups": "1"
+  },
+  {
+    "regex": "\\[enchantments=\\{silk_touch:1\\}\\]",
+    "to": "{Enchantments:[{id:\\\"minecraft:silk_touch\\\",lvl:1}]}",
+    "when": "<1.21"
+  },
+  {
+    "regex": "\\[enchantments=\\{fortune:3\\}\\]",
+    "to": "{Enchantments:[{id:\\\"minecraft:fortune\\\",lvl:3}]}",
+    "when": "<1.21"
+  },
+  {
+    "regex": ",count:(\\d+)\\}",
+    "to": ",Count:$1b}",
+    "when": "<1.21",
+    "groups": "1"
+  },
+  {
+    "regex": ",count:\" \\+ count \\+ \"\\}",
+    "to": ",Count:\" + count + \"b}",
+    "when": "<1.21"
+  },
+  {
+    "regex": "\\[enchantments=\\{efficiency:5\" \\+ vm \\+ \"\\}\\]",
+    "to": "{Enchantments:[{id:\\\"minecraft:efficiency\\\",lvl:5}]}",
+    "when": "<1.21"
+  },
+  {
+    "regex": "case \"freeze\" -> freeze\\(s\\);",
+    "to": "case \"freeze\" -> s.waitTicks(1); // no /tick command before 1.20.3",
+    "when": "<1.21"
+  },
+  {
+    "regex": "net\\.minecraft\\.client\\.renderer\\.state\\.level\\.",
+    "to": "net.minecraft.client.renderer.state.",
+    "when": "<26.2"
+  },
+  {
+    "regex": "net/minecraft/client/renderer/state/level/",
+    "to": "net/minecraft/client/renderer/state/",
+    "when": "<26.2"
+  },
+  {
+    "regex": "net\\.minecraft\\.client\\.renderer\\.block\\.dispatch\\.BlockStateModelPart\\b",
+    "to": "net.minecraft.client.renderer.block.model.BlockModelPart",
+    "when": "<26.2"
+  },
+  {
+    "regex": "\\bBlockStateModelPart\\b",
+    "to": "BlockModelPart",
+    "when": "<26.2"
+  },
+  {
+    "regex": "net\\.minecraft\\.client\\.renderer\\.block\\.dispatch\\.",
+    "to": "net.minecraft.client.renderer.block.model.",
+    "when": "<26.2"
+  },
+  {
+    "regex": "net/minecraft/client/renderer/block/dispatch/",
+    "to": "net/minecraft/client/renderer/block/model/",
+    "when": "<26.2"
+  },
+  {
+    "regex": "getModelManager\\(\\)\\.getBlockStateModelSet\\(\\)\\.get\\(",
+    "to": "getBlockRenderer().getBlockModel(",
+    "when": "<26.2"
+  },
+  {
+    "regex": "submitMovingBlock\\(pass\\.ps, this, 0\\)",
+    "to": "submitMovingBlock(pass.ps, this)",
+    "when": "<26.2"
+  },
+  {
+    "regex": "this\\.cardinalLighting = level\\.cardinalLighting\\(\\);",
+    "to": "((MovingBlockRenderState) this).level = level;",
+    "when": "<26.2"
+  },
+  {
+    "regex": "this\\.lightEngine = level\\.getLightEngine\\(\\);",
+    "to": "",
+    "when": "<26.2"
+  },
+  {
+    "regex": "ClientLevel level, long sectionNode",
+    "to": "net.minecraft.world.level.Level level, long sectionNode",
+    "when": "<26.2"
+  },
+  {
+    "regex": "callback\\.CallbackInfoReturnable;",
+    "to": "callback.CallbackInfo;",
+    "when": "<26.2",
+    "files": "^SectionMeshLiveMixin\\.java$"
+  },
+  {
+    "regex": "CallbackInfoReturnable<SectionMesh> cir",
+    "to": "CallbackInfo cir",
+    "when": "<26.2",
+    "files": "^SectionMeshLiveMixin\\.java$"
+  },
+  {
+    "regex": "ModList\\.isLoaded\\(",
+    "to": "ModList.get().isLoaded(",
+    "when": "<26.1",
+    "files": "^ForgeEntry\\.java$"
+  },
+  {
+    "regex": "ModList\\.getMods\\(\\)",
+    "to": "ModList.get().getMods()",
+    "when": "<26.1",
+    "files": "^ForgeEntry\\.java$"
+  },
+  {
+    "regex": "screens\\.options\\.OptionsSubScreen",
+    "to": "screens.OptionsSubScreen",
+    "when": "<1.21",
+    "files": "^SettingsScreen\\.java$"
+  },
+  {
+    "regex": "level\\.getGameRules\\(\\)\\.get\\(GameRules\\.RANDOM_TICK_SPEED\\)",
+    "to": "level.getGameRules().getInt(GameRules.RULE_RANDOMTICKING)",
+    "when": "<1.21.11"
+  },
+  {
+    "regex": "net\\.minecraft\\.world\\.level\\.gamerules\\.GameRules",
+    "to": "net.minecraft.world.level.GameRules",
+    "when": "<1.21.11"
+  },
+  {
+    "regex": "level\\.tickRateManager\\(\\)\\.runsNormally\\(\\)",
+    "to": "true",
+    "when": "<1.21"
+  },
+  {
+    "regex": "BlockTags\\.PREVENTS_NEARBY_LEAF_DECAY",
+    "to": "BlockTags.LOGS",
+    "when": "<26.1"
+  },
+  {
+    "regex": "gamerule random_tick_speed",
+    "to": "gamerule randomTickSpeed",
+    "when": "<1.21.11"
+  },
+  {
+    "regex": "gamerule send_command_feedback",
+    "to": "gamerule sendCommandFeedback",
+    "when": "<1.21.11"
+  }
+]

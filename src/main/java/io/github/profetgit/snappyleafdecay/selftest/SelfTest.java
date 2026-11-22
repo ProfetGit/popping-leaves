@@ -1,7 +1,7 @@
 package io.github.profetgit.snappyleafdecay.selftest;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import io.github.profetgit.snappyleafdecay.client.SnappyLeafDecayClient;
+import io.github.profetgit.snappyleafdecay.SnappyLeafDecay;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,7 +40,7 @@ public final class SelfTest {
     public static void onClientTick(Minecraft mc) {
         if (finished) return;
         if (++ticks % 400 == 0) {
-            SnappyLeafDecayClient.LOG.info("[selftest] step {}/{} screen={}", index, steps == null ? 0 : steps.size(),
+            SnappyLeafDecay.LOG.info("[selftest] step {}/{} screen={}", index, steps == null ? 0 : steps.size(),
                 mc.gui.screen() == null ? null : mc.gui.screen().getClass().getSimpleName());
         }
         if (steps == null) {
@@ -56,7 +56,7 @@ public final class SelfTest {
         try {
             while (index < steps.size() && steps.get(index).tick(mc)) index++;
         } catch (Throwable t) {
-            SnappyLeafDecayClient.LOG.error("[selftest] step {} failed", index, t);
+            SnappyLeafDecay.LOG.error("[selftest] step {} failed", index, t);
             record("step " + index, false, t.toString());
             index = steps.size();
         }
@@ -78,7 +78,7 @@ public final class SelfTest {
                 Files.createDirectories(out.getParent());
                 img.writeToFile(out);
             } catch (IOException e) {
-                SnappyLeafDecayClient.LOG.warn("[selftest] frame write failed: {}", e.toString());
+                SnappyLeafDecay.LOG.warn("[selftest] frame write failed: {}", e.toString());
             }
         }));
     }
@@ -100,7 +100,7 @@ public final class SelfTest {
     public static void record(String name, boolean pass, String detail) {
         RESULTS.add(String.format("{\"name\":\"%s\",\"pass\":%s,\"detail\":\"%s\"}",
             name, pass, detail.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " ")));
-        SnappyLeafDecayClient.LOG.info("[selftest] {} {} {}", pass ? "PASS" : "FAIL", name, detail);
+        SnappyLeafDecay.LOG.info("[selftest] {} {} {}", pass ? "PASS" : "FAIL", name, detail);
     }
 
     private static void finish(Minecraft mc) {
@@ -116,7 +116,7 @@ public final class SelfTest {
             Files.createDirectories(Path.of(OUT));
             Files.writeString(Path.of(OUT, "results.json"), json);
         } catch (IOException e) {
-            SnappyLeafDecayClient.LOG.error("[selftest] could not write results", e);
+            SnappyLeafDecay.LOG.error("[selftest] could not write results", e);
         }
         mc.stop();
     }

@@ -18,10 +18,31 @@ public final class SettingsScreen extends OptionsSubScreen {
         super(parent, Minecraft.getInstance().options, Component.literal("Popping Leaves"));
     }
 
+//? if >=1.21 {
     @Override
     protected void addOptions() {
         list.addSmall(options());
     }
+//?} else {
+/*    private net.minecraft.client.gui.components.OptionsList list;
+
+    @Override
+    protected void init() {
+        list = new net.minecraft.client.gui.components.OptionsList(minecraft, width, height, 32, height - 32, 25);
+        list.addSmall(options());
+        addWidget(list);
+        addRenderableWidget(net.minecraft.client.gui.components.Button.builder(net.minecraft.network.chat.CommonComponents.GUI_DONE,
+            b -> minecraft.setScreen(lastScreen)).bounds(width / 2 - 100, height - 27, 200, 20).build());
+    }
+
+    @Override
+    public void render(net.minecraft.client.gui.GuiGraphics g, int mouseX, int mouseY, float partial) {
+        renderBackground(g);
+        list.render(g, mouseX, mouseY, partial);
+        g.drawCenteredString(font, title, width / 2, 20, 0xFFFFFF);
+        super.render(g, mouseX, mouseY, partial);
+    }
+*///?}
 
     public static OptionInstance<?>[] options() {
         Config c = Config.get();

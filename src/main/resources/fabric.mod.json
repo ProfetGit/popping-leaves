@@ -14,13 +14,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "io.github.profetgit.snappyleafdecay.SnappyLeafDecay"
-    ],
-    "client": [
-      "io.github.profetgit.snappyleafdecay.client.SnappyLeafDecayClient"
+      "io.github.profetgit.snappyleafdecay.platform.fabric.FabricEntry"
     ],
     "modmenu": [
-      "io.github.profetgit.snappyleafdecay.client.ModMenuEntry"
+      "io.github.profetgit.snappyleafdecay.platform.fabric.ModMenuEntry"
     ]
   },
   "mixins": [
@@ -28,8 +25,7 @@
   ],
   "depends": {
     "fabricloader": ">=${fabric_loader}",
-    "fabric-api": "*",
-    "minecraft": "~${mc}",
-    "java": ">=25"
+    "minecraft": "${mc_range}",
+    "java": ">=${java}"
   }
 }

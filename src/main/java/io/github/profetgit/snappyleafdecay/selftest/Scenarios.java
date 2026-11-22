@@ -1,8 +1,9 @@
 package io.github.profetgit.snappyleafdecay.selftest;
 
+import io.github.profetgit.snappyleafdecay.SnappyLeafDecay;
+import io.github.profetgit.snappyleafdecay.platform.Platform;
 import io.github.profetgit.snappyleafdecay.client.Decays;
 import io.github.profetgit.snappyleafdecay.server.DecayQueue;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
@@ -30,9 +31,9 @@ final class Scenarios {
             .check("mods", mc -> {
                 StringBuilder sb = new StringBuilder();
                 for (String id : new String[] {"sodium", "iris", "fair_weather", "vanilla_timber", "veinminer", "leavesbegone", "fastleafdecay", "entityculling", "punchy"}) {
-                    if (FabricLoader.getInstance().isModLoaded(id)) sb.append(id).append(' ');
+                    if (Platform.get().isModLoaded(id)) sb.append(id).append(' ');
                 }
-                io.github.profetgit.snappyleafdecay.client.SnappyLeafDecayClient.LOG.info("[selftest] loaded mods: {}", sb);
+                io.github.profetgit.snappyleafdecay.SnappyLeafDecay.LOG.info("[selftest] loaded mods: {}", sb);
                 return null;
             });
         String only = System.getProperty("snappy_leaf_decay.selftest.scene", "all");
@@ -57,7 +58,7 @@ final class Scenarios {
     }
 
     private static void smoke(Script s) {
-        s.check("mod loaded", mc -> FabricLoader.getInstance().isModLoaded("snappy_leaf_decay") ? null : "snappy_leaf_decay not loaded")
+        s.check("mod loaded", mc -> Platform.get().isModLoaded("snappy_leaf_decay") ? null : "snappy_leaf_decay not loaded")
             .check("player alive", mc -> mc.player.isAlive() ? null : "player not alive")
             .capture("smoke", 1)
             .until("smoke frame written", 200, mc -> !SelfTest.capturing())
@@ -130,7 +131,7 @@ final class Scenarios {
             SelfTest.stopCapture();
             if (TestCompat.hudHidden(mc)) TestCompat.toggleHud(mc);
             long first = DecayQueue.firstRemovedTick - cutAt[0], last = DecayQueue.lastRemovedTick - cutAt[0];
-            io.github.profetgit.snappyleafdecay.client.SnappyLeafDecayClient.LOG.info(
+            io.github.profetgit.snappyleafdecay.SnappyLeafDecay.LOG.info(
                 "[selftest] oak wave: {} leaves, first removal {} ticks after the cut, last {} (span {}), removed {}, stale {}, busy ticks {}, max per tick {}; "
                     + "client: {} pops, {} lite, {} over budget, {} breaks, {} sheds, {} chips, {} sounds; client ticks from the cut to the first pop {}, to the last {}, fps {}",
                 n[0], first, last, last - first, DecayQueue.removedTotal, DecayQueue.staleTotal, DecayQueue.busyTicks, DecayQueue.maxRemovedInTick,
@@ -187,7 +188,7 @@ final class Scenarios {
         }
         s.waitTicks(20).check("classify_break", mc -> {
             int seen = Decays.started + Decays.overBudget - base[0], breaks = Decays.breaks - base[1];
-            io.github.profetgit.snappyleafdecay.client.SnappyLeafDecayClient.LOG.info("[selftest] classify break: {} breaks, {} seen as decay, events {}, changes {}, expired events {}, pending {}, other leaf losses {} ({})",
+            io.github.profetgit.snappyleafdecay.SnappyLeafDecay.LOG.info("[selftest] classify break: {} breaks, {} seen as decay, events {}, changes {}, expired events {}, pending {}, other leaf losses {} ({})",
                 breaks, seen, Decays.eventsSeen, Decays.changesSeen, Decays.expiredEvents, Decays.pending(), Decays.otherLoss, Decays.otherState);
             if (seen != 0) return "breaks seen as decays: " + seen;
             if (breaks != 200) return "breaks seen " + breaks + " of 200";
@@ -230,7 +231,7 @@ final class Scenarios {
             int frames = Decays.framesActive - base[2];
             double clientMs = frames == 0 ? 0 : (Decays.spentNanos - ns[0]) / 1e6 / frames;
             double serverMax = DecayQueue.maxTickNanos / 1e6, serverMean = DecayQueue.busyTicks == 0 ? 0 : DecayQueue.sumTickNanos / 1e6 / DecayQueue.busyTicks;
-            io.github.profetgit.snappyleafdecay.client.SnappyLeafDecayClient.LOG.info(
+            io.github.profetgit.snappyleafdecay.SnappyLeafDecay.LOG.info(
                 "[selftest] perf: {} leaves, last removal {} ticks after the cut, server worst tick {} ms, mean {} ms over {} busy ticks (max {} per tick); "
                     + "client {} ms per frame over {} frames, {} pops, {} lite, {} over budget, {} chips made, peak chips alive n/a, {} chip ms total",
                 n[0], last, String.format("%.2f", serverMax), String.format("%.3f", serverMean), DecayQueue.busyTicks, DecayQueue.maxRemovedInTick,
@@ -239,12 +240,13 @@ final class Scenarios {
             var sorted = new it.unimi.dsi.fastutil.longs.LongArrayList(DecayQueue.TICK_NANOS);
             sorted.sort(null);
             double p95 = sorted.isEmpty() ? 0 : sorted.getLong((int) Math.min(sorted.size() - 1, Math.floor(sorted.size() * 0.95))) / 1e6;
-            io.github.profetgit.snappyleafdecay.client.SnappyLeafDecayClient.LOG.info("[selftest] perf server p95 {} ms, worst {} ms", String.format("%.2f", p95), String.format("%.2f", serverMax));
+            io.github.profetgit.snappyleafdecay.SnappyLeafDecay.LOG.info("[selftest] perf server p95 {} ms, worst {} ms", String.format("%.2f", p95), String.format("%.2f", serverMax));
             // the worst tick of a loaded machine (other sessions' clients) is noise; the 95th percentile is the budget, the worst a hard cap
             if (p95 > 2.0) return String.format("server p95 tick %.2f ms (> 2)", p95);
             if (serverMax > 8.0) return String.format("server worst tick %.2f ms (> 8)", serverMax);
             if (serverMean > 1.5) return String.format("server mean %.3f ms (> 1.5)", serverMean);
-            if (clientMs > 1.0) return String.format("client %.3f ms per frame (> 1)", clientMs);
+            double budget = TestCompat.clientMsBudget();
+            if (clientMs > budget) return String.format("client %.3f ms per frame (> %.1f)", clientMs, budget);
             return null;
         });
     }
@@ -267,7 +269,7 @@ final class Scenarios {
             saplings[0] = sum;
         }).check("loot_vanilla_rate", mc -> {
             double mean = n[0] * 0.05, sd = Math.sqrt(n[0] * 0.05 * 0.95);
-            io.github.profetgit.snappyleafdecay.client.SnappyLeafDecayClient.LOG.info("[selftest] loot: {} leaves, {} saplings (expected {} +- {})", n[0], saplings[0],
+            io.github.profetgit.snappyleafdecay.SnappyLeafDecay.LOG.info("[selftest] loot: {} leaves, {} saplings (expected {} +- {})", n[0], saplings[0],
                 String.format("%.1f", mean), String.format("%.1f", sd));
             if (saplings[0] < mean - 4 * sd || saplings[0] > mean + 4 * sd) return saplings[0] + " saplings from " + n[0] + " leaves";
             return null;
@@ -303,7 +305,7 @@ final class Scenarios {
             SelfTest.stopCapture();
             if (TestCompat.hudHidden(mc)) TestCompat.toggleHud(mc);
             int pops = Decays.started - base[0], chips = Decays.chipsMade - base[1];
-            io.github.profetgit.snappyleafdecay.client.SnappyLeafDecayClient.LOG.info("[selftest] types: {} pops, {} chips, {} leaves removed", pops, chips, DecayQueue.removedTotal);
+            io.github.profetgit.snappyleafdecay.SnappyLeafDecay.LOG.info("[selftest] types: {} pops, {} chips, {} leaves removed", pops, chips, DecayQueue.removedTotal);
             if (DecayQueue.removedTotal < TYPES.length * 20) return "only " + DecayQueue.removedTotal + " leaves removed";
             if (pops != DecayQueue.removedTotal) return "pops " + pops + " of " + DecayQueue.removedTotal + " decays";
             if (chips < pops * 2) return "only " + chips + " chips for " + pops + " pops";
@@ -344,7 +346,7 @@ final class Scenarios {
         }).server(srv -> cmd(srv, "fill 0 " + Y + " 0 0 " + (Y + 1) + " 0 minecraft:air")).waitTicks(90).check("solo_one_pop", mc -> {
             SelfTest.stopCapture();
             if (TestCompat.hudHidden(mc)) TestCompat.toggleHud(mc);
-            io.github.profetgit.snappyleafdecay.client.SnappyLeafDecayClient.LOG.info("[selftest] solo: {} pops, {} mesh waits (watchdog), copy drawn at most {} frames after the removal", Decays.started - n[0], Decays.meshWaits - n[1], Decays.maxGapFrames);
+            io.github.profetgit.snappyleafdecay.SnappyLeafDecay.LOG.info("[selftest] solo: {} pops, {} mesh waits (watchdog), copy drawn at most {} frames after the removal", Decays.started - n[0], Decays.meshWaits - n[1], Decays.maxGapFrames);
             if (Decays.maxGapFrames > 1) return "the copy came " + Decays.maxGapFrames + " frames after the leaf left the level (a blink)";
             if (Decays.meshWaits - n[1] > 0) return "mesh hand-off signal never came (" + (Decays.meshWaits - n[1]) + " watchdog starts)";
             return Decays.started - n[0] == 1 ? null : "pops " + (Decays.started - n[0]) + " of 1";
@@ -355,7 +357,7 @@ final class Scenarios {
     private static void other(Script s) {
         int[] cols = {0};
         int[] n = {0};
-        s.check("other_mod_loaded", mc -> FabricLoader.getInstance().isModLoaded("leavesbegone") ? null : "run with --addon aside").server(srv -> {
+        s.check("other_mod_loaded", mc -> Platform.get().isModLoaded("leavesbegone") ? null : "run with --addon aside").server(srv -> {
             stage(srv, -9, 8, 14);
             io.github.profetgit.snappyleafdecay.Config.server().respectRandomTickSpeed = false;
             grove(srv, cols, 2, 3, 6);
@@ -449,7 +451,7 @@ final class Scenarios {
         }).server(srv -> cut(srv, cols, 6)).waitTicks(2).server(srv -> cmd(srv, "fill 0 " + Y + " 0 0 " + (Y + 6) + " 0 minecraft:oak_log")).waitTicks(80)
             .check("stale_recovers", mc -> {
                 int left = leaves(mc, 2, 3, 6);
-                io.github.profetgit.snappyleafdecay.client.SnappyLeafDecayClient.LOG.info("[selftest] stale: {} of {} leaves left, {} removed, {} stale at the due tick",
+                io.github.profetgit.snappyleafdecay.SnappyLeafDecay.LOG.info("[selftest] stale: {} of {} leaves left, {} removed, {} stale at the due tick",
                     left, n[0], DecayQueue.removedTotal, DecayQueue.staleTotal);
                 if (!(mc.level.getBlockState(new BlockPos(2, Y + 6, 2)).getBlock() instanceof LeavesBlock)) return "the persistent leaf is gone";
                 if (left < n[0] * 0.8) return "only " + left + " of " + n[0] + " leaves left after the log came back";

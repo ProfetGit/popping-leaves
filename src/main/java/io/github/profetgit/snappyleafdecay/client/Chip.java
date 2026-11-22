@@ -37,24 +37,43 @@ public final class Chip extends TerrainParticle {
         this.lifetime = 10 + this.random.nextInt(7);
     }
 
+//? if >=1.21 {
+    private float u(float f) {
+        return this.sprite.getU(f);
+    }
+
+    private float v(float f) {
+        return this.sprite.getV(f);
+    }
+//?} else {
+/*    // 1.20.1 takes the position in sprite pixels (0 to 16), not as a fraction
+    private float u(float f) {
+        return this.sprite.getU(f * 16.0);
+    }
+
+    private float v(float f) {
+        return this.sprite.getV(f * 16.0);
+    }
+*///?}
+
     @Override
     protected float getU0() {
-        return this.sprite.getU(tu + 1.0f / Math.max(1, this.sprite.contents().width()) * 0.98f);
+        return u(tu + 1.0f / Math.max(1, this.sprite.contents().width()) * 0.98f);
     }
 
     @Override
     protected float getU1() {
-        return this.sprite.getU(tu + 0.02f / Math.max(1, this.sprite.contents().width()));
+        return u(tu + 0.02f / Math.max(1, this.sprite.contents().width()));
     }
 
     @Override
     protected float getV0() {
-        return this.sprite.getV(tv + 0.02f / Math.max(1, this.sprite.contents().height()));
+        return v(tv + 0.02f / Math.max(1, this.sprite.contents().height()));
     }
 
     @Override
     protected float getV1() {
-        return this.sprite.getV(tv + 1.0f / Math.max(1, this.sprite.contents().height()) * 0.98f);
+        return v(tv + 1.0f / Math.max(1, this.sprite.contents().height()) * 0.98f);
     }
 
     @Override

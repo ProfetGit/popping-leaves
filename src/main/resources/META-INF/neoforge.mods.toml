@@ -1,0 +1,22 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "All Rights Reserved"
+
+[[mods]]
+modId = "snappy_leaf_decay"
+version = "${version}"
+displayName = "${name}"
+authors = "${author}"
+displayURL = "${homepage}"
+description = '''${description}'''
+displayTest = "IGNORE_ALL_VERSION"
+
+[[mixins]]
+config = "snappy_leaf_decay.mixins.json"
+
+[[dependencies.snappy_leaf_decay]]
+modId = "minecraft"
+type = "required"
+versionRange = "[${mc},${mc_next})"
+ordering = "NONE"
+side = "BOTH"

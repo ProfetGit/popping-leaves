@@ -1,7 +1,7 @@
 package io.github.profetgit.snappyleafdecay.server;
 
 import io.github.profetgit.snappyleafdecay.Config;
-import io.github.profetgit.snappyleafdecay.Platform;
+import io.github.profetgit.snappyleafdecay.platform.Platform;
 import io.github.profetgit.snappyleafdecay.SnappyLeafDecay;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import java.util.Map;
@@ -63,7 +63,7 @@ public final class DecayQueue {
         if (!otherChecked) {
             otherChecked = true;
             for (String id : OTHERS) {
-                if (Platform.isModLoaded(id)) {
+                if (Platform.get().isModLoaded(id)) {
                     other = id;
                     SnappyLeafDecay.LOG.info("Popping Leaves: {} already speeds up leaf decay, the server half stays off", id);
                     break;

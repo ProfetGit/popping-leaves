@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import io.github.profetgit.snappyleafdecay.platform.Platform;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,7 +17,7 @@ import java.nio.file.Path;
  */
 public final class Config {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final Path FILE = Platform.configDir().resolve(SnappyLeafDecay.ID + ".json");
+    private static final Path FILE = Platform.get().configDir().resolve(SnappyLeafDecay.ID + ".json");
 
     public int version = 1;
     public Server server = new Server();

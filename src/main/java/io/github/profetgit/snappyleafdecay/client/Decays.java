@@ -90,11 +90,12 @@ public final class Decays {
         firstStartTick = lastStartTick = -1;
     }
 
-    static void clear() {
+    public static void clear() {
         POPS.clear();
         PENDING.clear();
         EVENTS.clear();
         LIVE.clear();
+        COMPILE_STARTS.clear();
         liveChips = 0;
     }
 
@@ -153,13 +154,26 @@ public final class Decays {
         }
     }
 
-    /** A chunk mesh went live (any thread): LevelRenderer.removeTransientBlocksInSection. */
+    /** A chunk mesh went live (any thread): LevelRenderer.removeTransientBlocksInSection (26.3), or the mesh swap before it. */
     public static void meshLive(long sectionNode, long compileStartNs) {
         if (!POPS.isEmpty()) LIVE.add(new long[] {sectionNode, compileStartNs});
     }
 
+    /** Before 26.3: Util.getNanos() when a mesh region of a section was made (render thread), the clock 26.3's transient blocks keep. */
+    private static final java.util.concurrent.ConcurrentHashMap<Long, Long> COMPILE_STARTS = new java.util.concurrent.ConcurrentHashMap<>();
+
+    public static void compileStarted(long sectionNode) {
+        COMPILE_STARTS.put(sectionNode, Util.getNanos());
+    }
+
+    /** The mesh of this section is live: its compile started when its region was made. */
+    public static void meshLive(long sectionNode) {
+        Long ns = COMPILE_STARTS.get(sectionNode);
+        meshLive(sectionNode, ns == null ? 0 : ns);
+    }
+
     /** Every client tick (END_CLIENT_TICK), after the clock: a leaf no break event claimed within a tick is a decay. */
-    static void tick() {
+    public static void tick() {
         long t = Clock.ticks();
         if (!PENDING.isEmpty()) {
             List<Pop> due = null;
