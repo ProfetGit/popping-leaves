@@ -1,6 +1,6 @@
 ![Popping Leaves](https://raw.githubusercontent.com/ProfetGit/popping-leaves/main/docs/banner.webp)
 
-**Tree down. Leaves pop.** Cut a tree and its leaves follow in one fast wave: each leaf snaps out and sprays a few pixel chips, instead of lingering for a minute and vanishing one by one. A Fabric mod for Minecraft Java 26.3 with a server half and a client half; either one works alone.
+**Tree down. Leaves pop.** Cut a tree and its leaves follow in one fast wave: each leaf snaps out and sprays a few pixel chips, instead of lingering for a minute and vanishing one by one. A mod for Minecraft Java 26.3, 26.2, 1.21.11, 1.21.1 and 1.20.1 on Fabric, Quilt, Forge and NeoForge, with a server half and a client half; either one works alone.
 
 ![Features](https://raw.githubusercontent.com/ProfetGit/popping-leaves/main/docs/desc/title-features.webp)
 
@@ -11,9 +11,7 @@
 - **Modded client, vanilla server.** Ordinary decay gets the pop.
 - **Big trees.** Capped per tick, so a jungle giant clears without a lag spike.
 
-| ![An oak's logs vanish and its crown pops away in a wave](https://raw.githubusercontent.com/ProfetGit/popping-leaves/main/docs/clips/oak-fell.webp) | ![A plain oak: the logs go and the leaves pop away, drops land](https://raw.githubusercontent.com/ProfetGit/popping-leaves/main/docs/clips/oak-plain.webp) |
-| --- | --- |
-| ![A giant spruce crown opens up and clears in one sweep](https://raw.githubusercontent.com/ProfetGit/popping-leaves/main/docs/clips/giant-spruce.webp) | ![A tall birch clears in the same wave](https://raw.githubusercontent.com/ProfetGit/popping-leaves/main/docs/clips/birch-fell.webp) |
+![Four Popping Leaves clips: an oak, a modded pink maple from Biomes O' Plenty, a plain oak and a giant spruce, each crown popping away in a wave](https://raw.githubusercontent.com/ProfetGit/popping-leaves/main/docs/clips/showcase.webp)
 
 ![How to use](https://raw.githubusercontent.com/ProfetGit/popping-leaves/main/docs/desc/title-how-to-use.webp)
 
@@ -25,21 +23,22 @@ Open the settings screen from Mod Menu (optional). It has a master switch for th
 
 ![Compatibility](https://raw.githubusercontent.com/ProfetGit/popping-leaves/main/docs/desc/title-compatibility.webp)
 
-- Works with Sodium and Iris shader packs (tested with Complementary), Fair Weather, Timber and Veinminer.
+- Works with Sodium and Iris shader packs (tested with Complementary), Fair Weather, Timber and Veinminer on 26.3. On the older versions only vanilla rendering is tested so far.
 - Cut by a tree feller or by hand, the leaves follow the same way.
+- Modded trees work out of the box if their leaves are built on vanilla's leaf block. Tested with Biomes O' Plenty on Fabric 26.3: 19 of 20 leaf types decay fast, Null Leaves keep their normal speed.
 - Other mods that already speed up leaf decay make the server half stand aside, so nothing is doubled.
 - With `randomTickSpeed` 0 the server half stands aside too, as vanilla decay would not run either.
 
 ![Installation](https://raw.githubusercontent.com/ProfetGit/popping-leaves/main/docs/desc/title-installation.webp)
 
-Put the jar in your `mods` folder. Minecraft 26.3 on Fabric (needs [Fabric API](https://www.curseforge.com/minecraft/mc-mods/fabric-api)). Install it on the server for the fast decay, on the client for the pop, or on both.
+Put the jar for your Minecraft version and loader in your `mods` folder. Fabric and Quilt use the Fabric jar and need no other mod (Fabric API is not required); on 1.20.1 NeoForge runs the Forge jar. Install it on the server for the fast decay, on the client for the pop, or on both.
 
 ![More from Profet](https://raw.githubusercontent.com/ProfetGit/popping-leaves/main/docs/desc/title-more-from-profet.webp)
 
 <!-- promo:start -->
-| [![Traveler's Lantern: Your light. Hands free. Client or server.](https://raw.githubusercontent.com/ProfetGit/assets/main/promo/travelers-lantern.webp)](https://www.curseforge.com/minecraft/mc-mods/travelers-lantern) | [![Far Out Zoom: The horizon, up close. Client side.](https://raw.githubusercontent.com/ProfetGit/assets/main/promo/far-out-zoom.webp)](https://www.curseforge.com/minecraft/mc-mods/far-out-zoom) |
-| --- | --- |
-| [![Tidy Pockets: One click. All sorted. Client side.](https://raw.githubusercontent.com/ProfetGit/assets/main/promo/tidy-pockets.webp)](https://www.curseforge.com/minecraft/mc-mods/tidy-pockets) | [![Timber: One chop. Whole tree. Server side.](https://raw.githubusercontent.com/ProfetGit/assets/main/promo/timber.webp)](https://www.curseforge.com/minecraft/mc-mods/profets-timber) |
+[<img src="https://raw.githubusercontent.com/ProfetGit/assets/main/promo/travelers-lantern.webp" alt="Traveler's Lantern: Your light. Hands free. Client or server." width="406">](https://www.curseforge.com/minecraft/mc-mods/travelers-lantern) [<img src="https://raw.githubusercontent.com/ProfetGit/assets/main/promo/far-out-zoom.webp" alt="Far Out Zoom: The horizon, up close. Client side." width="406">](https://www.curseforge.com/minecraft/mc-mods/far-out-zoom)
+
+[<img src="https://raw.githubusercontent.com/ProfetGit/assets/main/promo/tidy-pockets.webp" alt="Tidy Pockets: One click. All sorted. Client side." width="406">](https://www.curseforge.com/minecraft/mc-mods/tidy-pockets) [<img src="https://raw.githubusercontent.com/ProfetGit/assets/main/promo/timber.webp" alt="Timber: One chop. Whole tree. Server side." width="406">](https://www.curseforge.com/minecraft/mc-mods/profets-timber)
 <!-- promo:end -->
 
 ![License](https://raw.githubusercontent.com/ProfetGit/popping-leaves/main/docs/desc/title-license.webp)

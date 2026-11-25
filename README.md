@@ -16,12 +16,7 @@
 - **Modded client, vanilla server.** Ordinary decay gets the pop.
 - **Big trees.** Capped per tick, so a jungle giant clears without a lag spike.
 
-<p align="center">
-<img src="https://raw.githubusercontent.com/ProfetGit/popping-leaves/main/docs/clips/oak-fell.webp" alt="An oak's logs vanish and its crown pops away in a wave" width="49%">
-<img src="https://raw.githubusercontent.com/ProfetGit/popping-leaves/main/docs/clips/oak-plain.webp" alt="A plain oak: the logs go and the leaves pop away, drops land" width="49%">
-<img src="https://raw.githubusercontent.com/ProfetGit/popping-leaves/main/docs/clips/giant-spruce.webp" alt="A giant spruce crown opens up and clears in one sweep" width="49%">
-<img src="https://raw.githubusercontent.com/ProfetGit/popping-leaves/main/docs/clips/birch-fell.webp" alt="A tall birch clears in the same wave" width="49%">
-</p>
+![Four Popping Leaves clips: an oak, a modded pink maple from Biomes O' Plenty, a plain oak and a giant spruce, each crown popping away in a wave](https://raw.githubusercontent.com/ProfetGit/popping-leaves/main/docs/clips/showcase.webp)
 
 ![How to use](https://raw.githubusercontent.com/ProfetGit/popping-leaves/main/docs/desc/title-how-to-use.webp)
 
@@ -35,6 +30,7 @@ Open the settings screen from Mod Menu (optional). It has a master switch for th
 
 - Works with Sodium and Iris shader packs (tested with Complementary), Fair Weather, Timber and Veinminer on 26.3. On the older versions only vanilla rendering is tested so far.
 - Cut by a tree feller or by hand, the leaves follow the same way.
+- Modded trees work out of the box if their leaves are built on vanilla's leaf block. Tested with Biomes O' Plenty on Fabric 26.3: 19 of 20 leaf types decay fast, Null Leaves keep their normal speed.
 - Other mods that already speed up leaf decay make the server half stand aside, so nothing is doubled.
 - With `randomTickSpeed` 0 the server half stands aside too, as vanilla decay would not run either.
 
